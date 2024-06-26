@@ -82,10 +82,10 @@ async def main():
 
 def callback(sender: BleakGATTCharacteristic, data: bytearray):
     # print(f"{sender} {data}")
-    DATA.intensity = 100 * struct.unpack('<f', data[5:9])[0]
     DATA.dose = 100 * struct.unpack('<f', data[1:5])[0]
-    DATA.temp = data[12]
+    DATA.intensity = 100 * struct.unpack('<f', data[5:9])[0]
     DATA.bat = data[11]
+    DATA.temp = data[12]
     DATA.add_metrics(DATA.intensity, DATA.temp)
     # printresult(DATA)
 
