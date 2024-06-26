@@ -14,14 +14,21 @@ class Data:
     temp = None
     bat = None
     intensity_list = []
+    temp_list = []
 
-    def add_intensity(self, intens: float):
+    def add_intensity(self, intens: float, temp: float):
         self.intensity_list.append(intens)
+        self.temp_list.append(temp)
 
     def get_avg_intensity(self) -> float:
         avg_intens = sum(self.intensity_list) / len(self.intensity_list)
         self.intensity_list.clear()
         return avg_intens
+
+    def get_avg_temp(self) -> float:
+        avg_temp = sum(self.temp_list) / len(self.temp_list)
+        self.temp_list.clear()
+        return avg_temp
 
 
 DATA = Data()
@@ -44,15 +51,17 @@ async def main():
                         RECONNECT_FLAG = False
                         break
                 # once per 5 minutes
-                if len(DATA.intensity_list) == 0:
+                if len(DATA.intensity_list) == 0 or len(DATA.temp_list) == 0:
                     print(f"{datetime.datetime.now()} Empty list of measurements, reconnecting")
                     break
                 if DATA.intensity is not None:
                     avg_intens = DATA.get_avg_intensity()
+                    avg_temp = DATA.get_avg_temp()
                     post_data = {
                         'ID': MAC_ADDR,
                         'NAME': 'AtomFast',
                         'R_DoseRate': avg_intens,
+                        'TEMP_Detector': avg_temp,
                     }
 
                     post_headers = {
@@ -62,7 +71,7 @@ async def main():
                     }
 
                     response = requests.post(url='https://narodmon.ru/post.php', data=post_data, headers=post_headers)
-                    print(f"{datetime.datetime.now()} Post data to narodmon AVG Intesity: {avg_intens} \u03BCR/h. Result: {response}")
+                    print(f"{datetime.datetime.now()} Post data to narodmon AVG Intesity: {avg_intens} \u03BCR/h, AVG Temp: {avg_temp}\u2103  Result: {response}")
         except Exception as e:
             print(f"Error while working with device {MAC_ADDR}. {e}")
         finally:
@@ -74,10 +83,10 @@ async def main():
 def callback(sender: BleakGATTCharacteristic, data: bytearray):
     # print(f"{sender} {data}")
     DATA.intensity = 100 * struct.unpack('<f', data[5:9])[0]
-    DATA.add_intensity(DATA.intensity)
     DATA.dose = 100 * struct.unpack('<f', data[1:5])[0]
     DATA.temp = data[12]
     DATA.bat = data[11]
+    DATA.add_intensity(DATA.intensity, DATA.temp)
     # printresult(DATA)
 
 
@@ -94,6 +103,7 @@ def printresult(data: Data):
 def disconnect_callback(client: BleakClient):
     print(f"{client.address} disconnect event recieved (no device nearby).")
     DATA.intensity_list.clear()
+    DATA.temp_list.clear()
     RECONNECT_FLAG = True
 
 
