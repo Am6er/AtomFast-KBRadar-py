@@ -7,16 +7,17 @@ CHARACTERISTIC = '70bc767e-7a1a-4304-81ed-14b9af54f7bd'
 
 
 async def main():
+    client = BleakClient(MAC_ADDR, timeout=60.0, disconnected_callback=disconnect_callback)
     try:
-        async with BleakClient(MAC_ADDR, timeout=60.0) as client:
-            await client.start_notify(CHARACTERISTIC, callback)
-            while True:
-                await asyncio.sleep(2)
+        await client.connect()
+        await client.start_notify(CHARACTERISTIC, callback)
+        while True:
+            await asyncio.sleep(2)
     except Exception as e:
         print(f"Error while working with device {MAC_ADDR}. {e}")
-        if client is not None and client.is_connected:
-            await client.stop_notify(CHARACTERISTIC)
-            await client.disconnect()
+    finally:
+        await client.stop_notify(CHARACTERISTIC)
+        await client.disconnect()
 
 
 def callback(sender: BleakGATTCharacteristic, data: bytearray):
@@ -30,6 +31,12 @@ def callback(sender: BleakGATTCharacteristic, data: bytearray):
     bat = data[11]
     print(f"Battery: {bat}%")
     print("---")
+
+
+def disconnect_callback(client: BleakClient):
+    print(f"{client.address} disconnect event recieved (no device nearby).")
+    for task in asyncio.Task.all_tasks():
+        task.cancel()
 
 
 asyncio.run(main())
