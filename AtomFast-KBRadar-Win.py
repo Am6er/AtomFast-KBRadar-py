@@ -19,8 +19,8 @@ async def main():
             await client.disconnect()
 
 
-def callback(data: bytearray):
-    # print(f"{sender} {data}")
+def callback(sender: BleakGATTCharacteristic, data: bytearray):
+    print(f"{sender} {data}")
     intensity = struct.unpack('<f', data[5:9])[0]
     print(f"Current intensity: {intensity} \u03BCSv/h")
     dose = struct.unpack('<f', data[1:5])[0]
