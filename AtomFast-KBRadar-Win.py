@@ -1,6 +1,6 @@
 import asyncio
+import datetime
 import requests
-
 from bleak import BleakClient, BleakGATTCharacteristic
 import struct
 
@@ -37,10 +37,11 @@ async def main():
                 await asyncio.sleep(60 * 5)
                 # once per 5 minutes
                 if DATA.intensity is not None:
+                    avg_intens = DATA.get_avg_intensity()
                     post_data = {
                         'ID': MAC_ADDR,
                         'NAME': 'AtomFast',
-                        'R_DoseRate': DATA.get_avg_intensity(),
+                        'R_DoseRate': avg_intens,
                     }
 
                     post_headers = {
@@ -50,7 +51,7 @@ async def main():
                     }
 
                     response = requests.post(url='https://narodmon.ru/post.php', data=post_data, headers=post_headers)
-                    print(response)
+                    print(f"{datetime.datetime.now()} Post data to narodmon AVG Intesity: {avg_intens} \u03BCSv/h. Result: {response}")
         except Exception as e:
             print(f"Error while working with device {MAC_ADDR}. {e}")
         finally:
@@ -72,6 +73,7 @@ def callback(sender: BleakGATTCharacteristic, data: bytearray):
 def printresult(data: Data):
     if data.intensity is None:
         return
+    print(f"{datetime.datetime.now()}")
     print(f"Current intensity: {data.intensity} \u03BCSv/h")
     print(f"Dose: {data.dose} mSv")
     print(f"Temperature: {data.temp}\u2103")
