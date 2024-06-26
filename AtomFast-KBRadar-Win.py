@@ -31,6 +31,7 @@ async def main():
     while True:
         client = BleakClient(MAC_ADDR, timeout=60.0, disconnected_callback=disconnect_callback)
         try:
+            print(f"{datetime.datetime.now()} Connect to device with MAC {MAC_ADDR}")
             await client.connect()
             await client.start_notify(CHARACTERISTIC, callback)
             while True:
