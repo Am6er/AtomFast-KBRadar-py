@@ -6,7 +6,7 @@ import struct
 
 MAC_ADDR = 'A8:10:87:22:40:40'
 CHARACTERISTIC = '70bc767e-7a1a-4304-81ed-14b9af54f7bd'
-
+RECONNECT_FLAG = False
 
 class Data:
     intensity = None
@@ -28,15 +28,25 @@ DATA = Data()
 
 
 async def main():
+    global RECONNECT_FLAG
     while True:
         client = BleakClient(MAC_ADDR, timeout=60.0, disconnected_callback=disconnect_callback)
         try:
-            print(f"{datetime.datetime.now()} Connect to device with MAC {MAC_ADDR}")
             await client.connect()
             await client.start_notify(CHARACTERISTIC, callback)
+            print(f"{datetime.datetime.now()} Connect to device with MAC {MAC_ADDR}")
             while True:
-                await asyncio.sleep(60 * 5)
+                seconds = 60
+                for _ in range(0, seconds):
+                    await asyncio.sleep(5)
+                    if RECONNECT_FLAG:
+                        print(f"{datetime.datetime.now()} Stop flag recieved, reconnecting")
+                        RECONNECT_FLAG = False
+                        break
                 # once per 5 minutes
+                if len(DATA.intensity_list) == 0:
+                    print(f"{datetime.datetime.now()} Empty list of measurements, reconnecting")
+                    break
                 if DATA.intensity is not None:
                     avg_intens = DATA.get_avg_intensity()
                     post_data = {
@@ -83,6 +93,8 @@ def printresult(data: Data):
 
 def disconnect_callback(client: BleakClient):
     print(f"{client.address} disconnect event recieved (no device nearby).")
+    DATA.intensity_list.clear()
+    RECONNECT_FLAG = True
 
 
 asyncio.run(main())
