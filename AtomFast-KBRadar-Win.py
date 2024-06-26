@@ -16,11 +16,11 @@ class Data:
     intensity_list = []
     temp_list = []
 
-    def add_intensity(self, intens: float, temp: float):
+    def add_metrics(self, intens: float, temp: float):
         self.intensity_list.append(intens)
         self.temp_list.append(temp)
 
-    def add_metrics(self) -> float:
+    def get_avg_intensity(self) -> float:
         avg_intens = sum(self.intensity_list) / len(self.intensity_list)
         self.intensity_list.clear()
         return avg_intens
