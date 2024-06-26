@@ -47,8 +47,10 @@ async def main():
                     await asyncio.sleep(5)
                     if DATA.RECONNECT_FLAG:
                         print(f"{datetime.datetime.now()} Stop flag recieved, reconnecting")
-                        DATA.RECONNECT_FLAG = False
                         break
+                if DATA.RECONNECT_FLAG:
+                    DATA.RECONNECT_FLAG = False
+                    break
                 # once per 5 minutes
                 if len(DATA.intensity_list) == 0 or len(DATA.temp_list) == 0:
                     print(f"{datetime.datetime.now()} Empty list of measurements, reconnecting")
