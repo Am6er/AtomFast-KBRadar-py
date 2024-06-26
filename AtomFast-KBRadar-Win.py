@@ -20,7 +20,7 @@ class Data:
         self.intensity_list.append(intens)
         self.temp_list.append(temp)
 
-    def get_avg_intensity(self) -> float:
+    def add_metrics(self) -> float:
         avg_intens = sum(self.intensity_list) / len(self.intensity_list)
         self.intensity_list.clear()
         return avg_intens
@@ -86,7 +86,7 @@ def callback(sender: BleakGATTCharacteristic, data: bytearray):
     DATA.dose = 100 * struct.unpack('<f', data[1:5])[0]
     DATA.temp = data[12]
     DATA.bat = data[11]
-    DATA.add_intensity(DATA.intensity, DATA.temp)
+    DATA.add_metrics(DATA.intensity, DATA.temp)
     # printresult(DATA)
 
 
