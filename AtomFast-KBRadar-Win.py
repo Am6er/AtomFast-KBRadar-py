@@ -100,7 +100,7 @@ def printresult(data: Data):
 
 
 def disconnect_callback(client: BleakClient):
-    print(f"{client.address} disconnect event recieved (no device nearby).")
+    print(f"{datetime.datetime.now()} {client.address} disconnect event recieved (no device nearby).")
     DATA.intensity_list.clear()
     DATA.temp_list.clear()
     DATA.RECONNECT_FLAG = True
