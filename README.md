@@ -13,6 +13,6 @@
 
 ```
 .\venv\Scripts\activate.bat
-.\venv\Scripts\python.exe C:\Users\moroz\PycharmProjects\AtomFast-KBRadar-py\SearchDevices.py 
+.\venv\Scripts\python.exe SearchDevices.py 
 Found device MAC A8:10:87:22:40:40, Name AtomFast 
 ```
