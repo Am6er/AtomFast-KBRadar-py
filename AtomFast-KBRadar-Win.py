@@ -51,7 +51,7 @@ async def main():
                     }
 
                     response = requests.post(url='https://narodmon.ru/post.php', data=post_data, headers=post_headers)
-                    print(f"{datetime.datetime.now()} Post data to narodmon AVG Intesity: {avg_intens} \u03BCSv/h. Result: {response}")
+                    print(f"{datetime.datetime.now()} Post data to narodmon AVG Intesity: {avg_intens} \u03BCR/h. Result: {response}")
         except Exception as e:
             print(f"Error while working with device {MAC_ADDR}. {e}")
         finally:
@@ -62,9 +62,9 @@ async def main():
 
 def callback(sender: BleakGATTCharacteristic, data: bytearray):
     # print(f"{sender} {data}")
-    DATA.intensity = struct.unpack('<f', data[5:9])[0]
+    DATA.intensity = 100 * struct.unpack('<f', data[5:9])[0]
     DATA.add_intensity(DATA.intensity)
-    DATA.dose = struct.unpack('<f', data[1:5])[0]
+    DATA.dose = 100 * struct.unpack('<f', data[1:5])[0]
     DATA.temp = data[12]
     DATA.bat = data[11]
     # printresult(DATA)
@@ -74,8 +74,8 @@ def printresult(data: Data):
     if data.intensity is None:
         return
     print(f"{datetime.datetime.now()}")
-    print(f"Current intensity: {data.intensity} \u03BCSv/h")
-    print(f"Dose: {data.dose} mSv")
+    print(f"Current intensity: {data.intensity} \u03BCR/h")
+    print(f"Dose: {data.dose} mR")
     print(f"Temperature: {data.temp}\u2103")
     print(f"Battery: {data.bat}%")
 
