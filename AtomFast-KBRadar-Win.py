@@ -13,6 +13,15 @@ class Data:
     dose = None
     temp = None
     bat = None
+    intensity_list = []
+
+    def add_intensity(self, intens: float):
+        self.intensity_list.append(intens)
+
+    def get_avg_intensity(self) -> float:
+        avg_intens = sum(self.intensity_list) / len(self.intensity_list)
+        self.intensity_list.clear()
+        return avg_intens
 
 
 DATA = Data()
@@ -25,13 +34,13 @@ async def main():
             await client.connect()
             await client.start_notify(CHARACTERISTIC, callback)
             while True:
-                await asyncio.sleep(60*5)
+                await asyncio.sleep(60 * 5)
                 # once per 5 minutes
                 if DATA.intensity is not None:
                     post_data = {
                         'ID': MAC_ADDR,
                         'NAME': 'AtomFast',
-                        'R_DoseRate': DATA.intensity,
+                        'R_DoseRate': DATA.get_avg_intensity(),
                     }
 
                     post_headers = {
@@ -42,7 +51,6 @@ async def main():
 
                     response = requests.post(url='https://narodmon.ru/post.php', data=post_data, headers=post_headers)
                     print(response)
-                    return
         except Exception as e:
             print(f"Error while working with device {MAC_ADDR}. {e}")
         finally:
@@ -54,14 +62,20 @@ async def main():
 def callback(sender: BleakGATTCharacteristic, data: bytearray):
     # print(f"{sender} {data}")
     DATA.intensity = struct.unpack('<f', data[5:9])[0]
-    # print(f"Current intensity: {DATA.intensity} \u03BCSv/h")
+    DATA.add_intensity(DATA.intensity)
     DATA.dose = struct.unpack('<f', data[1:5])[0]
-    # print(f"Dose: {DATA.dose} mSv")
     DATA.temp = data[12]
-    # print(f"Temperature: {DATA.temp}\u2103")
     DATA.bat = data[11]
-    # print(f"Battery: {DATA.bat}%")
-    # print("---")
+    # printresult(DATA)
+
+
+def printresult(data: Data):
+    if data.intensity is None:
+        return
+    print(f"Current intensity: {data.intensity} \u03BCSv/h")
+    print(f"Dose: {data.dose} mSv")
+    print(f"Temperature: {data.temp}\u2103")
+    print(f"Battery: {data.bat}%")
 
 
 def disconnect_callback(client: BleakClient):
