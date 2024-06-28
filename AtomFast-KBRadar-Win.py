@@ -78,7 +78,6 @@ async def main():
 
 
 def callback(sender: BleakGATTCharacteristic, data: bytearray):
-    # print(f"{sender} {data}")
     DATA.dose = 100 * struct.unpack('<f', data[1:5])[0]
     DATA.intensity = 100 * struct.unpack('<f', data[5:9])[0]
     DATA.bat = data[11]
@@ -90,11 +89,7 @@ def callback(sender: BleakGATTCharacteristic, data: bytearray):
 def printresult(data: Data):
     if data.intensity is None:
         return
-    print(f"{datetime.datetime.now()}")
-    print(f"Current intensity: {data.intensity} \u03BCR/h")
-    print(f"Dose: {data.dose} mR")
-    print(f"Temperature: {data.temp}\u2103")
-    print(f"Battery: {data.bat}%")
+    print(f"{datetime.datetime.now()};Intensity (\u03BCR/h);{data.intensity};Dose (mR);{data.dose};Temp (\u2103);{data.temp};Bat (%);{data.bat}")
 
 
 def disconnect_callback(client: BleakClient):
