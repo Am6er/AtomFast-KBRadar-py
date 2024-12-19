@@ -71,8 +71,13 @@ async def main():
                         'Host': 'narodmon.ru'
                     }
 
-                    response = requests.post(url='https://narodmon.ru/post.php', data=post_data, headers=post_headers)
-                    print(f"{datetime.datetime.now()} Post data to narodmon AVG Intesity: {avg_intens} \u03BCR/h, AVG Temp: {avg_temp} \u2103  Result: {response}")
+                    try:
+                        response = requests.post(url='https://narodmon.ru/post.php', data=post_data,
+                                                 headers=post_headers)
+                        print(
+                            f"{datetime.datetime.now()} Post data to narodmon AVG Intesity: {avg_intens} \u03BCR/h, AVG Temp: {avg_temp} \u2103  Result: {response}")
+                    except Exception as e:
+                        print(f"{datetime.datetime.now()} Error while sending data to narodmon. {e.__str__()}")
         except Exception as e:
             print(f"{datetime.datetime.now()} Error while working with device {MAC_ADDR}. {e.__str__()}")
 
